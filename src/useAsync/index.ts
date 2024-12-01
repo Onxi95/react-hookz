@@ -7,7 +7,7 @@ export type AsyncState<Result> =
 	| {
 			status: 'not-executed';
 			error: undefined;
-			result: Result;
+			result: undefined;
 	  }
 	| {
 			status: 'success';
@@ -17,13 +17,35 @@ export type AsyncState<Result> =
 	| {
 			status: 'error';
 			error: Error;
-			result: Result;
+			result: undefined;
 	  }
 	| {
-			status: AsyncStatus;
-			error: Error | undefined;
-			result: Result;
+			status: 'loading';
+			error: Error;
+			result: undefined;
 	  };
+
+export type DefinedAsyncState<Result> = 
+	| {
+		status: 'not-executed';
+		error: undefined;
+		result: Result;
+	}
+	| {
+		status: 'success';
+		error: undefined;
+		result: Result;
+	}
+	| {
+		status: 'error';
+		error: Error;
+		result: Result;
+	}
+	| {
+		status: 'loading';
+		error: Error;
+		result: Result;
+	};
 
 export type UseAsyncActions<Result, Args extends unknown[] = unknown[]> = {
 	/**
@@ -50,11 +72,11 @@ export type UseAsyncMeta<Result, Args extends unknown[] = unknown[]> = {
 export function useAsync<Result, Args extends unknown[] = unknown[]>(
 	asyncFn: (...params: Args) => Promise<Result>,
 	initialValue: Result
-): [AsyncState<Result>, UseAsyncActions<Result, Args>, UseAsyncMeta<Result, Args>];
+): [DefinedAsyncState<Result>, UseAsyncActions<Result, Args>, UseAsyncMeta<Result, Args>];
 export function useAsync<Result, Args extends unknown[] = unknown[]>(
 	asyncFn: (...params: Args) => Promise<Result>,
 	initialValue?: Result
-): [AsyncState<Result | undefined>, UseAsyncActions<Result, Args>, UseAsyncMeta<Result, Args>];
+): [AsyncState<Result>, UseAsyncActions<Result, Args>, UseAsyncMeta<Result, Args>];
 
 /**
  * Tracks the result and errors of the provided async function and provides handles to control its execution.
@@ -66,7 +88,7 @@ export function useAsync<Result, Args extends unknown[] = unknown[]>(
 export function useAsync<Result, Args extends unknown[] = unknown[]>(
 	asyncFn: (...params: Args) => Promise<Result>,
 	initialValue?: Result
-): [AsyncState<Result | undefined>, UseAsyncActions<Result, Args>, UseAsyncMeta<Result, Args>] {
+): [AsyncState<Result>, UseAsyncActions<Result, Args>, UseAsyncMeta<Result, Args>] {
 	const [state, setState] = useState<AsyncState<Result | undefined>>({
 		status: 'not-executed',
 		error: undefined,
